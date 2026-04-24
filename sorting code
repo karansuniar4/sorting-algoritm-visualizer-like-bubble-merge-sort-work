@@ -1,0 +1,143 @@
+#include <iostream>
+#include <vector>
+#include <algorithm> // Added for max_element
+#include <chrono>
+#include <thread>
+#include <cstdlib>
+
+using namespace std;
+
+// Function to clear console screen on Windows and Mobile (Unix)
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+// Portable "Press any key" replacement
+void waitForKey() {
+    cout << "\n(Press Enter to continue...)";
+    cin.ignore(1000, '\n');
+    cin.get();
+}
+
+// Function to display array as bars
+void displayBars(const vector<int>& arr, int highlight1 = -1, int highlight2 = -1) {
+    if (arr.empty()) return;
+    int maxVal = *max_element(arr.begin(), arr.end());
+    int height = 10; 
+
+    for (int level = height; level > 0; level--) {
+        for (int i = 0; i < (int)arr.size(); i++) {
+            int barHeight = (arr[i] * height) / maxVal;
+            if (barHeight >= level) {
+                if (i == highlight1 || i == highlight2) cout << "O"; // Mobile safe highlight
+                else cout << "#"; // Mobile safe bar
+            } else {
+                cout << " ";
+            }
+            cout << " ";
+        }
+        cout << endl;
+    }
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+}
+
+void displayArray(const vector<int>& arr, int highlight1 = -1, int highlight2 = -1) {
+    cout << "\nCurrent Array: ";
+    for (int i = 0; i < (int)arr.size(); i++) {
+        if (i == highlight1 || i == highlight2) cout << "[" << arr[i] << "] ";
+        else cout << arr[i] << " ";
+    }
+    cout << endl;
+}
+
+// BUBBLE SORT
+void bubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n-1; i++) {
+        bool swapped = false;
+        for (int j = 0; j < n-i-1; j++) {
+            clearScreen();
+            cout << "=== BUBBLE SORT - Pass " << i+1 << " ===\n";
+            displayBars(arr, j, j+1);
+            if (arr[j] > arr[j+1]) {
+                swap(arr[j], arr[j+1]);
+                swapped = true;
+                cout << "-> Swapped " << arr[j+1] << " and " << arr[j] << endl;
+            } else {
+                cout << "-> No swap needed\n";
+            }
+            waitForKey();
+        }
+        if (!swapped) break;
+    }
+}
+
+// MERGE SORT HELPERS
+void merge(vector<int>& arr, int left, int mid, int right) {
+    vector<int> temp(right - left + 1);
+    int i = left, j = mid + 1, k = 0;
+    while (i <= mid && j <= right) 
+        temp[k++] = (arr[i] <= arr[j]) ? arr[i++] : arr[j++];
+    while (i <= mid) temp[k++] = arr[i++];
+    while (j <= right) temp[k++] = arr[j++];
+    for (i = left, k = 0; i <= right; i++, k++) arr[i] = temp[k];
+}
+
+void mergeSortVisual(vector<int>& arr, int left, int right) {
+    if (left >= right) return;
+    int mid = left + (right - left) / 2;
+    
+    clearScreen();
+    cout << "=== MERGE SORT - Splitting ===\n";
+    displayBars(arr, left, right);
+    waitForKey();
+
+    mergeSortVisual(arr, left, mid);
+    mergeSortVisual(arr, mid + 1, right);
+
+    merge(arr, left, mid, right);
+    clearScreen();
+    cout << "=== MERGE SORT - Merging ===\n";
+    displayBars(arr, left, right);
+    waitForKey();
+}
+
+vector<int> generateRandomArray(int size) {
+    vector<int> arr(size);
+    for (int i = 0; i < size; i++) arr[i] = rand() % 50 + 10;
+    return arr;
+}
+
+int main() {
+    srand(time(0));
+    int size;
+    cout << "Enter number of elements (5-15): ";
+    cin >> size;
+    size = (size < 3) ? 5 : (size > 15) ? 15 : size;
+
+    vector<int> original = generateRandomArray(size);
+
+    while (true) {
+        clearScreen();
+        cout << "1. Bubble Sort\n2. Merge Sort\n3. Exit\nChoice: ";
+        int choice;
+        cin >> choice;
+
+        if (choice == 3) break;
+        
+        vector<int> tempArr = original;
+        if (choice == 1) bubbleSort(tempArr);
+        else if (choice == 2) mergeSortVisual(tempArr, 0, tempArr.size() - 1);
+
+        clearScreen();
+        cout << "=== FINAL RESULT ===\n";
+        displayBars(tempArr);
+        waitForKey();
+    }
+    return 0;
+}
