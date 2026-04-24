@@ -1,1 +1,1 @@
-# sorting-algoritm-visualizer-like-bubble-merge-sort-work
+# sorting-algoritm-visualizer
